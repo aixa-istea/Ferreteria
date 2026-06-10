@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bajo Stock – El Tornillo</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🔩 El <span>Tornillo</span></div>
+  <nav>
+    <a href="productos.html">📦 Productos</a>
+    <a href="clientes.html">👤 Clientes</a>
+    <a href="ventas.html">🛒 Ventas</a>
+    <a href="proveedores.html">🚚 Proveedores</a>
+    <a href="usuarios.html">⚙️ Usuarios</a>
+    <a href="bajo-stock.html" class="active">⚠️ Bajo Stock</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="usuarioNombre" style="margin-bottom:8px;color:#fff;font-size:0.85rem"></div>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</aside>
+<main class="main">
+  <h1 class="page-title">⚠️ Reporte de Bajo Stock</h1>
+  <div class="card" id="resumen" style="margin-bottom:24px"></div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Descripción</th><th>Marca</th><th>Stock Actual</th><th>Stock Mínimo</th><th>Diferencia</th></tr>
+        </thead>
+        <tbody id="bodyBajoStock"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  document.getElementById('usuarioNombre').textContent = (() => { const u = getUsuario(); return u.nombre + ' ' + u.apellido; })();
+
+  async function cargar() {
+    const productos = await api.getBajoStock();
+    document.getElementById('resumen').innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="font-size:2rem">⚠️</div>
+        <div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--danger)">${productos.length} producto${productos.length !== 1 ? 's' : ''} con stock bajo</div>
+          <div style="color:var(--text-light);font-size:0.88rem">Productos con stock actual ≤ stock mínimo</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('bodyBajoStock').innerHTML = productos.map(p => `
+      <tr>
+        <td>${p.idProducto}</td>
+        <td>${p.descripcion}</td>
+        <td>${p.marca}</td>
+        <td><span class="badge badge-danger">${p.stockActual}</span></td>
+        <td>${p.stockMinimo}</td>
+        <td><span class="badge badge-warning">-${p.stockMinimo - p.stockActual}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  cargar();
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios – El Tornillo</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🔩 El <span>Tornillo</span></div>
+  <nav>
+    <a href="productos.html">📦 Productos</a>
+    <a href="clientes.html">👤 Clientes</a>
+    <a href="ventas.html">🛒 Ventas</a>
+    <a href="proveedores.html">🚚 Proveedores</a>
+    <a href="usuarios.html" class="active">⚙️ Usuarios</a>
+    <a href="bajo-stock.html">⚠️ Bajo Stock</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="usuarioNombre" style="margin-bottom:8px;color:#fff;font-size:0.85rem"></div>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</aside>
+<main class="main">
+  <h1 class="page-title">Usuarios</h1>
+  <div id="alert"></div>
+  <div class="card">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo usuario</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nombre</th><th>Login</th><th>Rol</th><th>Email</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyUsuarios"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Nuevo Usuario</h3>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Nombre</label><input id="fNombre"></div>
+      <div class="form-group"><label>Apellido</label><input id="fApellido"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Usuario Login</label><input id="fLogin"></div>
+      <div class="form-group"><label>Contraseña</label><input id="fPassword" type="password"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Email</label><input id="fEmail" type="email"></div>
+      <div class="form-group">
+        <label>Rol</label>
+        <select id="fRol">
+          <option value="1">Admin</option>
+          <option value="2">Vendedor</option>
+          <option value="3">Cajero</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  document.getElementById('usuarioNombre').textContent = (() => { const u = getUsuario(); return u.nombre + ' ' + u.apellido; })();
+
+  let usuarios = [];
+  let editandoId = null;
+
+  async function cargar() {
+    usuarios = await api.getUsuarios();
+    document.getElementById('bodyUsuarios').innerHTML = usuarios.map(u => `
+      <tr>
+        <td>${u.idUsuario}</td>
+        <td>${u.nombre} ${u.apellido}</td>
+        <td>${u.usuarioLogin}</td>
+        <td><span class="badge badge-info">${u.rol}</span></td>
+        <td>${u.email ?? '-'}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="editar(${u.idUsuario})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminar(${u.idUsuario})">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function abrirModal(u = null) {
+    editandoId = u?.idUsuario ?? null;
+    document.getElementById('modalTitulo').textContent = u ? 'Editar Usuario' : 'Nuevo Usuario';
+    document.getElementById('fNombre').value = u?.nombre ?? '';
+    document.getElementById('fApellido').value = u?.apellido ?? '';
+    document.getElementById('fLogin').value = u?.usuarioLogin ?? '';
+    document.getElementById('fLogin').disabled = !!editandoId;
+    document.getElementById('fPassword').value = '';
+    document.getElementById('fPassword').placeholder = editandoId ? 'Dejar vacío para no cambiar' : '';
+    document.getElementById('fEmail').value = u?.email ?? '';
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function cerrarModal() { document.getElementById('modal').classList.remove('active'); editandoId = null; }
+  function editar(id) { abrirModal(usuarios.find(u => u.idUsuario === id)); }
+
+  async function guardar() {
+    try {
+      if (editandoId) {
+        await api.updateUsuario(editandoId, {
+          nombre: document.getElementById('fNombre').value,
+          apellido: document.getElementById('fApellido').value,
+          email: document.getElementById('fEmail').value,
+          idRol: parseInt(document.getElementById('fRol').value),
+        });
+      } else {
+        await api.createUsuario({
+          nombre: document.getElementById('fNombre').value,
+          apellido: document.getElementById('fApellido').value,
+          usuarioLogin: document.getElementById('fLogin').value,
+          password: document.getElementById('fPassword').value,
+          email: document.getElementById('fEmail').value,
+          idRol: parseInt(document.getElementById('fRol').value),
+        });
+      }
+      cerrarModal(); mostrarAlerta('Usuario guardado.', 'success'); cargar();
+    } catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar este usuario?')) return;
+    try { await api.deleteUsuario(id); mostrarAlerta('Usuario eliminado.', 'success'); cargar(); }
+    catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  function mostrarAlerta(msg, tipo) {
+    const el = document.getElementById('alert');
+    el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 3000);
+  }
+
+  cargar();
+</script>
+</body>
+</html>

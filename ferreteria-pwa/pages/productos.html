@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productos – El Tornillo</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🔩 El <span>Tornillo</span></div>
+  <nav>
+    <a href="productos.html">📦 Productos</a>
+    <a href="clientes.html">👤 Clientes</a>
+    <a href="ventas.html">🛒 Ventas</a>
+    <a href="proveedores.html">🚚 Proveedores</a>
+    <a href="usuarios.html">⚙️ Usuarios</a>
+    <a href="bajo-stock.html">⚠️ Bajo Stock</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="usuarioNombre" style="margin-bottom:8px;color:#fff;font-size:0.85rem"></div>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</aside>
+<main class="main">
+  <h1 class="page-title">Productos</h1>
+  <div id="alert"></div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <input type="text" id="buscar" placeholder="Buscar producto..." style="width:260px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius)">
+      <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo producto</button>
+    </div>
+    <div class="table-wrap">
+      <table id="tablaProductos">
+        <thead>
+          <tr>
+            <th>#</th><th>Descripción</th><th>Marca</th>
+            <th>Precio Venta</th><th>Stock</th><th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="bodyProductos"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Nuevo Producto</h3>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Descripción</label><input id="fDescripcion"></div>
+      <div class="form-group"><label>ID Marca</label><input id="fMarca" type="number"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Precio Costo</label><input id="fCosto" type="number" step="0.01"></div>
+      <div class="form-group"><label>Precio Venta</label><input id="fVenta" type="number" step="0.01"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Stock Actual</label><input id="fStock" type="number"></div>
+      <div class="form-group"><label>Stock Mínimo</label><input id="fStockMin" type="number"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  const u = getUsuario();
+  document.getElementById('usuarioNombre').textContent = u.nombre + ' ' + u.apellido;
+  // Marcar activo
+  document.querySelectorAll('.sidebar nav a').forEach(a => {
+    if (a.href.includes('productos')) a.classList.add('active');
+  });
+
+  let productos = [];
+  let editandoId = null;
+
+  async function cargar() {
+    productos = await api.getProductos();
+    renderizar(productos);
+  }
+
+  function renderizar(lista) {
+    const tbody = document.getElementById('bodyProductos');
+    tbody.innerHTML = lista.map(p => `
+      <tr>
+        <td>${p.idProducto}</td>
+        <td>${p.descripcion}</td>
+        <td>${p.marca}</td>
+        <td>$${p.precioVenta.toLocaleString('es-AR')}</td>
+        <td>
+          <span class="badge ${p.bajoStock ? 'badge-danger' : 'badge-success'}">
+            ${p.stockActual}
+          </span>
+        </td>
+        <td><span class="badge badge-info">${p.estado}</span></td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="editar(${p.idProducto})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminar(${p.idProducto})">Baja</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('buscar').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    renderizar(productos.filter(p => p.descripcion.toLowerCase().includes(q) || p.marca.toLowerCase().includes(q)));
+  });
+
+  function abrirModal(p = null) {
+    editandoId = p?.idProducto ?? null;
+    document.getElementById('modalTitulo').textContent = p ? 'Editar Producto' : 'Nuevo Producto';
+    document.getElementById('fDescripcion').value = p?.descripcion ?? '';
+    document.getElementById('fMarca').value = p?.idMarca ?? '';
+    document.getElementById('fCosto').value = p?.precioCosto ?? '';
+    document.getElementById('fVenta').value = p?.precioVenta ?? '';
+    document.getElementById('fStock').value = p?.stockActual ?? '';
+    document.getElementById('fStockMin').value = p?.stockMinimo ?? '';
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal').classList.remove('active');
+    editandoId = null;
+  }
+
+  function editar(id) {
+    const p = productos.find(x => x.idProducto === id);
+    abrirModal(p);
+  }
+
+  async function guardar() {
+    const dto = {
+      descripcion: document.getElementById('fDescripcion').value,
+      idMarca: parseInt(document.getElementById('fMarca').value),
+      precioCosto: parseFloat(document.getElementById('fCosto').value),
+      precioVenta: parseFloat(document.getElementById('fVenta').value),
+      stockActual: parseInt(document.getElementById('fStock').value),
+      stockMinimo: parseInt(document.getElementById('fStockMin').value),
+    };
+    try {
+      if (editandoId) await api.updateProducto(editandoId, dto);
+      else await api.createProducto(dto);
+      cerrarModal();
+      mostrarAlerta('Producto guardado correctamente.', 'success');
+      cargar();
+    } catch(e) {
+      mostrarAlerta(e.message, 'danger');
+    }
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Dar de baja este producto?')) return;
+    try {
+      await api.deleteProducto(id);
+      mostrarAlerta('Producto dado de baja.', 'success');
+      cargar();
+    } catch(e) {
+      mostrarAlerta(e.message, 'danger');
+    }
+  }
+
+  function mostrarAlerta(msg, tipo) {
+    const el = document.getElementById('alert');
+    el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 3000);
+  }
+
+  cargar();
+</script>
+</body>
+</html>

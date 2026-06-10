@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ferretería El Tornillo</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <script>
+    // Redirige al login o a productos según si hay sesión
+    const u = sessionStorage.getItem('usuario');
+    window.location.href = u ? '/pages/productos.html' : '/pages/login.html';
+  </script>
+</body>
+</html>

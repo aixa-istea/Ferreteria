@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proveedores – El Tornillo</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🔩 El <span>Tornillo</span></div>
+  <nav>
+    <a href="productos.html">📦 Productos</a>
+    <a href="clientes.html">👤 Clientes</a>
+    <a href="ventas.html">🛒 Ventas</a>
+    <a href="proveedores.html" class="active">🚚 Proveedores</a>
+    <a href="usuarios.html">⚙️ Usuarios</a>
+    <a href="bajo-stock.html">⚠️ Bajo Stock</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="usuarioNombre" style="margin-bottom:8px;color:#fff;font-size:0.85rem"></div>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</aside>
+<main class="main">
+  <h1 class="page-title">Proveedores</h1>
+  <div id="alert"></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <input type="text" id="buscar" placeholder="Buscar proveedor..." style="width:260px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius)">
+      <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo proveedor</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Razón Social</th><th>CUIT</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyProveedores"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Nuevo Proveedor</h3>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="form-group"><label>Razón Social</label><input id="fRazonSocial"></div>
+    <div class="form-group"><label>CUIT</label><input id="fCuit"></div>
+    <div class="form-group"><label>Dirección</label><input id="fDireccion"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Teléfono</label><input id="fTelefono"></div>
+      <div class="form-group"><label>Email</label><input id="fEmail" type="email"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  document.getElementById('usuarioNombre').textContent = (() => { const u = getUsuario(); return u.nombre + ' ' + u.apellido; })();
+
+  let proveedores = [];
+  let editandoId = null;
+
+  async function cargar() {
+    proveedores = await api.getProveedores();
+    renderizar(proveedores);
+  }
+
+  function renderizar(lista) {
+    document.getElementById('bodyProveedores').innerHTML = lista.map(p => `
+      <tr>
+        <td>${p.idProveedor}</td>
+        <td>${p.razonSocial}</td>
+        <td>${p.cuit}</td>
+        <td>${p.telefono ?? '-'}</td>
+        <td>${p.email ?? '-'}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="editar(${p.idProveedor})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminar(${p.idProveedor})">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('buscar').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    renderizar(proveedores.filter(p => p.razonSocial.toLowerCase().includes(q) || p.cuit.includes(q)));
+  });
+
+  function abrirModal(p = null) {
+    editandoId = p?.idProveedor ?? null;
+    document.getElementById('modalTitulo').textContent = p ? 'Editar Proveedor' : 'Nuevo Proveedor';
+    document.getElementById('fRazonSocial').value = p?.razonSocial ?? '';
+    document.getElementById('fCuit').value = p?.cuit ?? '';
+    document.getElementById('fCuit').disabled = !!editandoId;
+    document.getElementById('fDireccion').value = p?.direccion ?? '';
+    document.getElementById('fTelefono').value = p?.telefono ?? '';
+    document.getElementById('fEmail').value = p?.email ?? '';
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function cerrarModal() { document.getElementById('modal').classList.remove('active'); editandoId = null; }
+  function editar(id) { abrirModal(proveedores.find(p => p.idProveedor === id)); }
+
+  async function guardar() {
+    try {
+      const dto = {
+        razonSocial: document.getElementById('fRazonSocial').value,
+        cuit: document.getElementById('fCuit').value,
+        direccion: document.getElementById('fDireccion').value,
+        telefono: document.getElementById('fTelefono').value,
+        email: document.getElementById('fEmail').value,
+      };
+      if (editandoId) await api.updateProveedor(editandoId, dto);
+      else await api.createProveedor(dto);
+      cerrarModal(); mostrarAlerta('Proveedor guardado.', 'success'); cargar();
+    } catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar este proveedor?')) return;
+    try { await api.deleteProveedor(id); mostrarAlerta('Proveedor eliminado.', 'success'); cargar(); }
+    catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  function mostrarAlerta(msg, tipo) {
+    const el = document.getElementById('alert');
+    el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 3000);
+  }
+
+  cargar();
+</script>
+</body>
+</html>

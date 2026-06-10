@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ventas – El Tornillo</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🔩 El <span>Tornillo</span></div>
+  <nav>
+    <a href="productos.html">📦 Productos</a>
+    <a href="clientes.html">👤 Clientes</a>
+    <a href="ventas.html" class="active">🛒 Ventas</a>
+    <a href="proveedores.html">🚚 Proveedores</a>
+    <a href="usuarios.html">⚙️ Usuarios</a>
+    <a href="bajo-stock.html">⚠️ Bajo Stock</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="usuarioNombre" style="margin-bottom:8px;color:#fff;font-size:0.85rem"></div>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</aside>
+<main class="main">
+  <h1 class="page-title">Nueva Venta</h1>
+  <div id="alert"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:24px">
+    <!-- Buscador de productos -->
+    <div>
+      <div class="card">
+        <h3 style="margin-bottom:12px">Buscar producto</h3>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input id="buscarProducto" placeholder="Descripción o código..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius)">
+          <input id="buscarCliente" placeholder="DNI/CUIT del cliente..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius)">
+        </div>
+        <div id="clienteInfo" style="margin-bottom:12px;font-size:0.88rem;color:var(--text-light)"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Descripción</th><th>Marca</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+            <tbody id="bodyBusqueda"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carrito -->
+    <div>
+      <div class="card">
+        <h3 style="margin-bottom:12px">Carrito</h3>
+        <div class="carrito" id="carrito">
+          <div style="padding:24px;text-align:center;color:var(--text-light);font-size:0.88rem">Sin productos aún</div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="form-group">
+            <label>Medio de pago</label>
+            <select id="medioPago">
+              <option value="1">Efectivo</option>
+              <option value="2">Tarjeta Débito</option>
+              <option value="3">Tarjeta Crédito</option>
+              <option value="4">QR</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="confirmarVenta()">Confirmar venta</button>
+        </div>
+      </div>
+
+      <!-- Últimas ventas -->
+      <div class="card">
+        <h3 style="margin-bottom:12px">Últimas ventas</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="bodyVentas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  const usuario = getUsuario();
+  document.getElementById('usuarioNombre').textContent = usuario.nombre + ' ' + usuario.apellido;
+
+  let productos = [];
+  let carrito = []; // { producto, cantidad, idCliente }
+  let clienteActual = null;
+
+  async function cargarProductos() {
+    productos = await api.getProductos();
+    renderizarBusqueda(productos);
+  }
+
+  function renderizarBusqueda(lista) {
+    document.getElementById('bodyBusqueda').innerHTML = lista.map(p => `
+      <tr>
+        <td>${p.descripcion}</td>
+        <td>${p.marca}</td>
+        <td>$${p.precioVenta.toLocaleString('es-AR')}</td>
+        <td><span class="badge ${p.bajoStock ? 'badge-danger' : 'badge-success'}">${p.stockActual}</span></td>
+        <td><button class="btn btn-sm btn-primary" onclick="agregarAlCarrito(${p.idProducto})" ${p.stockActual === 0 ? 'disabled' : ''}>+</button></td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('buscarProducto').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    renderizarBusqueda(productos.filter(p => p.descripcion.toLowerCase().includes(q)));
+  });
+
+  document.getElementById('buscarCliente').addEventListener('keydown', async e => {
+    if (e.key !== 'Enter') return;
+    const doc = e.target.value.trim();
+    if (!doc) return;
+    try {
+      clienteActual = await api.getClienteByDoc(doc);
+      document.getElementById('clienteInfo').innerHTML =
+        `<span style="color:var(--success)">✓ Cliente: ${clienteActual.nombre} ${clienteActual.apellido}</span>`;
+    } catch {
+      document.getElementById('clienteInfo').innerHTML =
+        `<span style="color:var(--danger)">Cliente no encontrado</span>`;
+      clienteActual = null;
+    }
+  });
+
+  function agregarAlCarrito(idProducto) {
+    if (!clienteActual) { mostrarAlerta('Buscá el cliente primero (Enter en el campo DNI/CUIT).', 'danger'); return; }
+    const p = productos.find(x => x.idProducto === idProducto);
+    const existente = carrito.find(x => x.producto.idProducto === idProducto);
+    if (existente) {
+      if (existente.cantidad >= p.stockActual) { mostrarAlerta('Stock insuficiente.', 'danger'); return; }
+      existente.cantidad++;
+    } else {
+      carrito.push({ producto: p, cantidad: 1, idCliente: clienteActual.idCliente });
+    }
+    renderizarCarrito();
+  }
+
+  function quitarDelCarrito(idProducto) {
+    carrito = carrito.filter(x => x.producto.idProducto !== idProducto);
+    renderizarCarrito();
+  }
+
+  function renderizarCarrito() {
+    const el = document.getElementById('carrito');
+    if (carrito.length === 0) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-light);font-size:0.88rem">Sin productos aún</div>';
+      return;
+    }
+    const total = carrito.reduce((acc, x) => acc + x.producto.precioVenta * x.cantidad, 0);
+    el.innerHTML = carrito.map(x => `
+      <div class="carrito-item">
+        <div>
+          <div style="font-weight:600">${x.producto.descripcion}</div>
+          <div style="font-size:0.8rem;color:var(--text-light)">$${x.producto.precioVenta.toLocaleString('es-AR')} x ${x.cantidad}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span>$${(x.producto.precioVenta * x.cantidad).toLocaleString('es-AR')}</span>
+          <button class="btn btn-sm btn-danger" onclick="quitarDelCarrito(${x.producto.idProducto})">×</button>
+        </div>
+      </div>
+    `).join('') + `<div class="carrito-total">Total: $${total.toLocaleString('es-AR')}</div>`;
+  }
+
+  async function confirmarVenta() {
+    if (carrito.length === 0) { mostrarAlerta('El carrito está vacío.', 'danger'); return; }
+    if (!clienteActual) { mostrarAlerta('Seleccioná un cliente.', 'danger'); return; }
+    const dto = {
+      idMedioDePago: parseInt(document.getElementById('medioPago').value),
+      idUsuario: usuario.idUsuario,
+      detalles: carrito.map(x => ({
+        idProducto: x.producto.idProducto,
+        cantidad: x.cantidad,
+        idCliente: x.idCliente
+      }))
+    };
+    try {
+      await api.createVenta(dto);
+      carrito = [];
+      clienteActual = null;
+      document.getElementById('buscarCliente').value = '';
+      document.getElementById('clienteInfo').innerHTML = '';
+      renderizarCarrito();
+      mostrarAlerta('¡Venta confirmada!', 'success');
+      cargarProductos();
+      cargarVentas();
+    } catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  async function cargarVentas() {
+    const ventas = await api.getVentas();
+    document.getElementById('bodyVentas').innerHTML = ventas.slice(0, 5).map(v => `
+      <tr>
+        <td>#${v.idVenta}</td>
+        <td>$${v.totalVenta.toLocaleString('es-AR')}</td>
+        <td><span class="badge ${v.estadoVenta === 'confirmada' ? 'badge-success' : 'badge-danger'}">${v.estadoVenta}</span></td>
+        <td>${v.estadoVenta === 'confirmada' ? `<button class="btn btn-sm btn-secondary" onclick="anular(${v.idVenta})">Anular</button>` : ''}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function anular(id) {
+    if (!confirm('¿Anular esta venta?')) return;
+    try { await api.anularVenta(id); mostrarAlerta('Venta anulada.', 'success'); cargarVentas(); cargarProductos(); }
+    catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  function mostrarAlerta(msg, tipo) {
+    const el = document.getElementById('alert');
+    el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 4000);
+  }
+
+  cargarProductos();
+  cargarVentas();
+</script>
+</body>
+</html>

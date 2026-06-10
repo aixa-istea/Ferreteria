@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes – El Tornillo</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🔩 El <span>Tornillo</span></div>
+  <nav>
+    <a href="productos.html">📦 Productos</a>
+    <a href="clientes.html" class="active">👤 Clientes</a>
+    <a href="ventas.html">🛒 Ventas</a>
+    <a href="proveedores.html">🚚 Proveedores</a>
+    <a href="usuarios.html">⚙️ Usuarios</a>
+    <a href="bajo-stock.html">⚠️ Bajo Stock</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="usuarioNombre" style="margin-bottom:8px;color:#fff;font-size:0.85rem"></div>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</aside>
+<main class="main">
+  <h1 class="page-title">Clientes</h1>
+  <div id="alert"></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <input type="text" id="buscar" placeholder="Buscar por nombre o documento..." style="width:300px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius)">
+      <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo cliente</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Nombre</th><th>Documento</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="bodyClientes"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Nuevo Cliente</h3>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Nombre</label><input id="fNombre"></div>
+      <div class="form-group"><label>Apellido</label><input id="fApellido"></div>
+    </div>
+    <div class="form-group"><label>Dirección</label><input id="fDireccion"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Teléfono</label><input id="fTelefono"></div>
+      <div class="form-group"><label>Email</label><input id="fEmail" type="email"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo Documento</label>
+        <select id="fTipoDoc"><option value="dni">DNI</option><option value="cuit">CUIT</option></select>
+      </div>
+      <div class="form-group"><label>Número Documento</label><input id="fNroDoc"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  document.getElementById('usuarioNombre').textContent = (() => { const u = getUsuario(); return u.nombre + ' ' + u.apellido; })();
+
+  let clientes = [];
+  let editandoId = null;
+
+  async function cargar() {
+    clientes = await api.getClientes();
+    renderizar(clientes);
+  }
+
+  function renderizar(lista) {
+    document.getElementById('bodyClientes').innerHTML = lista.map(c => `
+      <tr>
+        <td>${c.idCliente}</td>
+        <td>${c.nombre} ${c.apellido}</td>
+        <td><span class="badge badge-info">${c.tipoDocumento.toUpperCase()}</span> ${c.numeroDocumento}</td>
+        <td>${c.telefono ?? '-'}</td>
+        <td>${c.email ?? '-'}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="editar(${c.idCliente})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminar(${c.idCliente})">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('buscar').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    renderizar(clientes.filter(c =>
+      `${c.nombre} ${c.apellido}`.toLowerCase().includes(q) ||
+      c.numeroDocumento.includes(q)
+    ));
+  });
+
+  function abrirModal(c = null) {
+    editandoId = c?.idCliente ?? null;
+    document.getElementById('modalTitulo').textContent = c ? 'Editar Cliente' : 'Nuevo Cliente';
+    document.getElementById('fNombre').value = c?.nombre ?? '';
+    document.getElementById('fApellido').value = c?.apellido ?? '';
+    document.getElementById('fDireccion').value = c?.direccion ?? '';
+    document.getElementById('fTelefono').value = c?.telefono ?? '';
+    document.getElementById('fEmail').value = c?.email ?? '';
+    document.getElementById('fTipoDoc').value = c?.tipoDocumento ?? 'dni';
+    document.getElementById('fNroDoc').value = c?.numeroDocumento ?? '';
+    document.getElementById('fNroDoc').disabled = !!editandoId;
+    document.getElementById('fTipoDoc').disabled = !!editandoId;
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function cerrarModal() { document.getElementById('modal').classList.remove('active'); editandoId = null; }
+
+  function editar(id) { abrirModal(clientes.find(c => c.idCliente === id)); }
+
+  async function guardar() {
+    try {
+      if (editandoId) {
+        await api.updateCliente(editandoId, {
+          nombre: document.getElementById('fNombre').value,
+          apellido: document.getElementById('fApellido').value,
+          direccion: document.getElementById('fDireccion').value,
+          telefono: document.getElementById('fTelefono').value,
+          email: document.getElementById('fEmail').value,
+        });
+      } else {
+        await api.createCliente({
+          nombre: document.getElementById('fNombre').value,
+          apellido: document.getElementById('fApellido').value,
+          direccion: document.getElementById('fDireccion').value,
+          telefono: document.getElementById('fTelefono').value,
+          email: document.getElementById('fEmail').value,
+          tipoDocumento: document.getElementById('fTipoDoc').value,
+          numeroDocumento: document.getElementById('fNroDoc').value,
+        });
+      }
+      cerrarModal(); mostrarAlerta('Cliente guardado.', 'success'); cargar();
+    } catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar este cliente?')) return;
+    try { await api.deleteCliente(id); mostrarAlerta('Cliente eliminado.', 'success'); cargar(); }
+    catch(e) { mostrarAlerta(e.message, 'danger'); }
+  }
+
+  function mostrarAlerta(msg, tipo) {
+    const el = document.getElementById('alert');
+    el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 3000);
+  }
+
+  cargar();
+</script>
+</body>
+</html>
