@@ -1,0 +1,17 @@
+version: '3.8'
+ 
+services:
+  mysql-ferreteria:
+    image: mysql:latest
+    container_name: mysql-ferreteria
+    environment:
+      MYSQL_ROOT_PASSWORD: ferreteria123
+      MYSQL_DATABASE: ferreteria_el_tornillo
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_ferreteria_data:/var/lib/mysql
+    restart: unless-stopped
+ 
+volumes:
+  mysql_ferreteria_data:
