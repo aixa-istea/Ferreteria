@@ -29,7 +29,7 @@
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <input type="text" id="buscar" placeholder="Buscar producto..." style="width:260px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius)">
-      <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo producto</button>
+      <button class="btn btn-primary btn-abm" onclick="abrirModal()">+ Nuevo producto</button>
     </div>
     <div class="table-wrap">
       <table id="tablaProductos">
@@ -75,6 +75,7 @@
 <script src="../js/auth.js"></script>
 <script>
   requireAuth();
+  aplicarPermisosABM(['admin']);
   const u = getUsuario();
   document.getElementById('usuarioNombre').textContent = u.nombre + ' ' + u.apellido;
   // Marcar activo
@@ -105,8 +106,8 @@
         </td>
         <td><span class="badge badge-info">${p.estado}</span></td>
         <td>
-          <button class="btn btn-sm btn-secondary" onclick="editar(${p.idProducto})">Editar</button>
-          <button class="btn btn-sm btn-danger" onclick="eliminar(${p.idProducto})">Baja</button>
+          <button class="btn btn-sm btn-secondary btn-abm" onclick="editar(${p.idProducto})">Editar</button>
+          <button class="btn btn-sm btn-danger btn-abm" onclick="eliminar(${p.idProducto})">Baja</button>
         </td>
       </tr>
     `).join('');

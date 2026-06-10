@@ -28,7 +28,7 @@
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <input type="text" id="buscar" placeholder="Buscar por nombre o documento..." style="width:300px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius)">
-      <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo cliente</button>
+      <button class="btn btn-primary btn-abm" onclick="abrirModal()">+ Nuevo cliente</button>
     </div>
     <div class="table-wrap">
       <table>
@@ -74,6 +74,7 @@
 <script src="../js/auth.js"></script>
 <script>
   requireAuth();
+  aplicarPermisosABM(['admin', 'vendedor']);
   document.getElementById('usuarioNombre').textContent = (() => { const u = getUsuario(); return u.nombre + ' ' + u.apellido; })();
 
   let clientes = [];
