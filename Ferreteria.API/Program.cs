@@ -21,6 +21,8 @@ builder.Services.AddDbContext<FerreteriaDbContext>(options =>
  builder.Services.AddScoped<IProveedorService, ProveedorService>();
  builder.Services.AddScoped<IVentaRepository, VentaRepository>();
  builder.Services.AddScoped<IVentaService, VentaService>();
+ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
