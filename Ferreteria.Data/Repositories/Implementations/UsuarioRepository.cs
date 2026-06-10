@@ -22,6 +22,13 @@ public class UsuarioRepository : IUsuarioRepository
             .ToListAsync();
     }
 
+    public async Task<Usuarios?> GetByLoginYHashAsync(string usuarioLogin, string passwordHash)
+    {
+         return await _context.Usuarios
+            .Include(u => u.IdRolNavigation)
+            .FirstOrDefaultAsync(u => u.UsuarioLogin == usuarioLogin
+                                    && u.PasswordHash == passwordHash);
+    }
     public async Task<Usuarios?> GetByIdAsync(int id)
     {
         return await _context.Usuarios

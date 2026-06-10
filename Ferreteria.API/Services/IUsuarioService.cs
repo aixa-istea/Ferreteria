@@ -5,6 +5,7 @@ namespace Ferreteria.API.Services;
 public interface IUsuarioService
 {
     Task<IEnumerable<UsuarioDto>> GetAllAsync();
+    Task<LoginResponseDto?> LoginAsync(LoginDto dto);
     Task<UsuarioDto?> GetByIdAsync(int id);
     Task<UsuarioDto> CreateAsync(CrearUsuarioDto dto);
     Task<UsuarioDto?> UpdateAsync(int id, ActualizarUsuarioDto dto);

@@ -40,6 +40,21 @@ public class UsuarioService : IUsuarioService
         var u = await _repo.GetByIdAsync(id);
         return u == null ? null : ToDto(u);
     }
+    public async Task<LoginResponseDto?> LoginAsync(LoginDto dto)
+    {
+         var hash = HashPassword(dto.Password);
+        var usuario = await _repo.GetByLoginYHashAsync(dto.UsuarioLogin, hash);
+        if (usuario == null) return null;
+
+         return new LoginResponseDto
+        {
+            IdUsuario = usuario.IdUsuario,
+             Nombre = usuario.Nombre,
+             Apellido = usuario.Apellido,
+             UsuarioLogin = usuario.UsuarioLogin,
+             Rol = usuario.IdRolNavigation?.Nombre ?? ""
+         };
+    }
 
     public async Task<UsuarioDto> CreateAsync(CrearUsuarioDto dto)
     {
