@@ -1,4 +1,10 @@
-# **Diccionario de Datos (DD)**
+# 📘 **Diccionario de Datos (DD)**
+
+---
+
+> Este documento fue usado como referencia para el diseño de la base de datos. Describe las estructuras de almacenamiento utilizadas en el sistema de gestión de la ferretería El Tornillo. La especificación se encuentra documentada utilizando la notación Yourdon, definiendo las entidades del sistema, sus atributos, claves primarias, claves foráneas y dominios de valores permitidos cuando corresponda.
+
+---
 
 * **clientes** = { @id_cliente, nombre, apellido, dirección, telefono, email, tipo_documento [dni | cuit], numero_documento }
 
