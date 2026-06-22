@@ -10,7 +10,6 @@
 |----------------|---------|
 | **Motor** | MySQL 8.0 |
 | **Tablas** | 18 |
-| **Vistas** | 4 |
 | **Relaciones** | 22 claves foráneas |
 | **Normalización** | 3NF (con excepción controlada) |
 
@@ -101,94 +100,6 @@ Relaciona productos con proveedores.
 |-------|------|-------------|
 | `id_producto` | INT FK | ID del producto (PK compuesta) |
 | `id_proveedor` | INT FK | ID del proveedor (PK compuesta) |
-
-
-## Vistas en estudio
-
-> **En proceso de definición:** Las siguientes vistas están planificadas para facilitar consultas y reportes frecuentes.
-
-### 1. `VentasCompletas`
-
-**Propósito:** Historial de ventas con datos completos de cliente, usuario y medio de pago.
-
-```sql
-CREATE VIEW VentasCompletas AS
-SELECT 
-    v.id_venta,
-    v.fecha,
-    CONCAT(c.nombre, ' ', c.apellido) AS cliente,
-    p.descripcion AS producto,
-    dv.cantidad,
-    dv.precio_venta,
-    (dv.cantidad * dv.precio_venta) AS subtotal_linea,
-    mp.nombre AS medio_pago,
-    u.usuario_login AS vendedor,
-    v.estado_venta
-FROM venta v
-JOIN detalle_venta dv ON v.id_venta = dv.id_venta
-JOIN clientes c ON dv.id_cliente = c.id_cliente
-JOIN productos p ON dv.id_producto = p.id_producto
-JOIN medio_pago mp ON v.id_medio_de_pago = mp.id_medio_de_pago
-JOIN usuarios u ON v.id_usuario = u.id_usuario;
-```
-
-### 2. `ResumenClientes`
-
-**Propósito:** Estadísticas de compras por cliente.
-
-```sql
-CREATE VIEW ResumenClientes AS
-SELECT 
-    c.id_cliente,
-    c.numero_documento,
-    CONCAT(c.nombre, ' ', c.apellido) AS cliente,
-    COUNT(DISTINCT dv.id_venta) AS cantidad_tickets,
-    SUM(dv.cantidad * dv.precio_venta) AS total_gastado
-FROM clientes c
-JOIN detalle_venta dv ON c.id_cliente = dv.id_cliente
-GROUP BY c.id_cliente, c.numero_documento, c.nombre, c.apellido;
-```
-
-### 3. ProductosMasVendidos
-
-**Propósito:** Top 10 productos más vendidos.
-
-```sql
-CREATE VIEW ProductosMasVendidos AS
-SELECT 
-    p.id_producto,
-    p.descripcion,
-    SUM(dv.cantidad) AS total_unidades_vendidas,
-    SUM(dv.cantidad * dv.precio_venta) AS ingresos_generados
-FROM productos p
-JOIN detalle_venta dv ON p.id_producto = dv.id_producto
-JOIN venta v ON dv.id_venta = v.id_venta
-WHERE v.estado_venta = 'confirmada'
-GROUP BY p.id_producto, p.descripcion
-ORDER BY total_unidades_vendidas DESC;
-```
-
-### 4. ResumenInventario
-
-**Propósito:** Estado general del inventario.
-
-```sql
-CREATE VIEW ResumenInventario AS
-SELECT 
-    id_producto,
-    descripcion,
-    stock_actual,
-    stock_minimo,
-    (stock_actual * precio_costo) AS valor_costo_total,
-    (stock_actual * precio_venta) AS valor_venta_estimado,
-    CASE 
-        WHEN stock_actual <= 0 THEN 'Sin Stock'
-        WHEN stock_actual <= stock_minimo THEN 'Reponer Urgente'
-        ELSE 'Stock Normal'
-    END AS estado_stock
-FROM productos
-WHERE estado = 'activo';
-```
 
 ### Relaciones Principales
 
