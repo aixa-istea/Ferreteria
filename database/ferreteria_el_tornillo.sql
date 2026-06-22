@@ -23,7 +23,77 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup 
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '26bb312a-6467-11f1-a4b8-a60862bdcfc5:1-48';
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '26bb312a-6467-11f1-a4b8-a60862bdcfc5:1-56';
+
+--
+-- Temporary view structure for view `ProductosMasVendidos`
+--
+
+DROP TABLE IF EXISTS `ProductosMasVendidos`;
+/*!50001 DROP VIEW IF EXISTS `ProductosMasVendidos`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `ProductosMasVendidos` AS SELECT 
+ 1 AS `id_producto`,
+ 1 AS `descripcion`,
+ 1 AS `total_unidades_vendidas`,
+ 1 AS `ingresos_generados`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `ResumenClientes`
+--
+
+DROP TABLE IF EXISTS `ResumenClientes`;
+/*!50001 DROP VIEW IF EXISTS `ResumenClientes`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `ResumenClientes` AS SELECT 
+ 1 AS `id_cliente`,
+ 1 AS `numero_documento`,
+ 1 AS `cliente`,
+ 1 AS `cantidad_tickets`,
+ 1 AS `total_gastado`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `ResumenInventario`
+--
+
+DROP TABLE IF EXISTS `ResumenInventario`;
+/*!50001 DROP VIEW IF EXISTS `ResumenInventario`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `ResumenInventario` AS SELECT 
+ 1 AS `id_producto`,
+ 1 AS `descripcion`,
+ 1 AS `stock_actual`,
+ 1 AS `stock_minimo`,
+ 1 AS `valor_costo_total`,
+ 1 AS `valor_venta_estimado`,
+ 1 AS `estado_stock`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `VentasCompletas`
+--
+
+DROP TABLE IF EXISTS `VentasCompletas`;
+/*!50001 DROP VIEW IF EXISTS `VentasCompletas`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `VentasCompletas` AS SELECT 
+ 1 AS `id_venta`,
+ 1 AS `fecha`,
+ 1 AS `cliente`,
+ 1 AS `producto`,
+ 1 AS `cantidad`,
+ 1 AS `precio_venta`,
+ 1 AS `subtotal_linea`,
+ 1 AS `medio_pago`,
+ 1 AS `vendedor`,
+ 1 AS `estado_venta`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `categorias_producto`
@@ -138,7 +208,7 @@ CREATE TABLE `detalle_venta` (
 
 LOCK TABLES `detalle_venta` WRITE;
 /*!40000 ALTER TABLE `detalle_venta` DISABLE KEYS */;
-INSERT INTO `detalle_venta` VALUES (1,1,1,4500.00,1),(1,9,1,13900.00,1),(2,12,3,550.00,3),(2,14,2,750.00,3),(2,23,5,200.00,3),(3,9,1,13900.00,4),(4,17,1,6200.00,5),(4,21,2,780.00,5),(5,10,1,11500.00,6),(5,11,1,15800.00,6),(6,22,1,3600.00,7),(7,1,1,4500.00,8),(8,6,1,2900.00,9),(8,7,1,6800.00,9),(9,2,1,1600.00,10),(10,5,1,2400.00,1),(11,11,6,15800.00,11);
+INSERT INTO `detalle_venta` VALUES (1,1,1,4500.00,1),(1,9,1,13900.00,1),(2,12,3,550.00,3),(2,14,2,750.00,3),(2,23,5,200.00,3),(3,9,1,13900.00,4),(4,17,1,6200.00,5),(4,21,2,780.00,5),(5,10,1,11500.00,6),(5,11,1,15800.00,6),(6,22,1,3600.00,7),(7,1,1,4500.00,8),(8,6,1,2900.00,9),(8,7,1,6800.00,9),(9,2,1,1600.00,10),(10,5,1,2400.00,1),(11,11,6,15800.00,11),(12,2,3,1600.00,3),(12,10,3,11500.00,3),(12,11,2,15800.00,3),(12,22,3,3600.00,3),(12,23,3,200.00,3);
 /*!40000 ALTER TABLE `detalle_venta` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -314,7 +384,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (1,1,'Martillo carpintero 20oz mango fibra',2800.00,4500.00,25,5,'activo'),(2,2,'Destornillador Phillips N2 mango ergonomico',950.00,1600.00,40,8,'activo'),(3,1,'Cinta metrica 5m con freno',1200.00,1950.00,30,6,'activo'),(4,4,'Llave ajustable 12 pulgadas',3100.00,5200.00,18,4,'activo'),(5,2,'Alicate universal 8 pulgadas',1500.00,2400.00,22,5,'activo'),(6,1,'Nivel de burbuja 60cm aluminio',1800.00,2900.00,15,4,'activo'),(7,4,'Juego llaves fijas 6 a 22mm x8 piezas',4200.00,6800.00,10,3,'activo'),(8,2,'Sierra para metales arco regulable',1650.00,2700.00,20,4,'activo'),(9,3,'Taladro percutor 650W mandril 13mm',8500.00,13900.00,12,3,'activo'),(10,3,'Amoladora angular 115mm 710W',7200.00,11500.00,8,2,'activo'),(11,3,'Atornillador a bateria 12V con 2 baterias',9800.00,15800.00,6,2,'activo'),(12,1,'Tornillos autoperforantes 1 pulgada x100u',320.00,550.00,150,20,'activo'),(13,1,'Clavos de acero 2 pulgadas x kg',280.00,480.00,80,15,'activo'),(14,1,'Tarugos Fisher S8 x50u',450.00,750.00,120,20,'activo'),(15,1,'Bulones 1/4 con tuerca x50u',380.00,640.00,90,15,'activo'),(16,1,'Tornillos madera 3/4 pulgada x100u',290.00,490.00,110,20,'activo'),(17,5,'Pintura latex interior blanco 4L',3800.00,6200.00,20,5,'activo'),(18,5,'Pintura esmalte sintetico negro brillante 1L',2100.00,3400.00,15,4,'activo'),(19,5,'Impermeabilizante para techo 4L',4500.00,7300.00,12,3,'activo'),(20,5,'Pintura anti-oxido rojo minio 1L',1900.00,3100.00,18,4,'activo'),(21,6,'Pastina gris x1kg',480.00,780.00,60,10,'activo'),(22,6,'Adhesivo ceramico 30kg',2200.00,3600.00,25,5,'activo'),(23,8,'Cinta de teflon x10m',120.00,200.00,200,30,'activo'),(24,8,'Silicona neutra transparente 280ml',680.00,1100.00,45,8,'activo'),(25,7,'Lampara LED 9W E27 luz fria',480.00,780.00,80,15,'activo');
+INSERT INTO `productos` VALUES (1,1,'Martillo carpintero 20oz mango fibra',2800.00,4500.00,25,4,'activo'),(2,2,'Destornillador Phillips N2 mango ergonomico',950.00,1600.00,40,8,'activo'),(3,1,'Cinta metrica 5m con freno',1200.00,1950.00,30,6,'activo'),(4,4,'Llave ajustable 12 pulgadas',3100.00,5200.00,18,4,'activo'),(5,2,'Alicate universal 8 pulgadas',1500.00,2400.00,22,5,'activo'),(6,1,'Nivel de burbuja 60cm aluminio',1800.00,2900.00,15,4,'activo'),(7,4,'Juego llaves fijas 6 a 22mm x8 piezas',4200.00,6800.00,10,3,'activo'),(8,2,'Sierra para metales arco regulable',1650.00,2700.00,20,4,'activo'),(9,3,'Taladro percutor 650W mandril 13mm',8500.00,13900.00,12,3,'activo'),(10,3,'Amoladora angular 115mm 710W',7200.00,11500.00,8,2,'activo'),(11,3,'Atornillador a bateria 12V con 2 baterias',9800.00,15800.00,6,2,'activo'),(12,1,'Tornillos autoperforantes 1 pulgada x100u',320.00,550.00,150,20,'activo'),(13,1,'Clavos de acero 2 pulgadas x kg',280.00,480.00,80,15,'activo'),(14,1,'Tarugos Fisher S8 x50u',450.00,750.00,120,20,'activo'),(15,1,'Bulones 1/4 con tuerca x50u',380.00,640.00,90,15,'activo'),(16,1,'Tornillos madera 3/4 pulgada x100u',290.00,490.00,110,20,'activo'),(17,5,'Pintura latex interior blanco 4L',3800.00,6200.00,20,5,'activo'),(18,5,'Pintura esmalte sintetico negro brillante 1L',2100.00,3400.00,15,4,'activo'),(19,5,'Impermeabilizante para techo 4L',4500.00,7300.00,12,3,'activo'),(20,5,'Pintura anti-oxido rojo minio 1L',1900.00,3100.00,18,4,'activo'),(21,6,'Pastina gris x1kg',480.00,780.00,60,10,'activo'),(22,6,'Adhesivo ceramico 30kg',2200.00,3600.00,25,5,'activo'),(23,8,'Cinta de teflon x10m',120.00,200.00,200,30,'activo'),(24,8,'Silicona neutra transparente 280ml',680.00,1100.00,45,8,'activo'),(25,7,'Lampara LED 9W E27 luz fria',480.00,780.00,80,15,'activo');
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -538,7 +608,7 @@ CREATE TABLE `venta` (
   KEY `id_usuario` (`id_usuario`),
   CONSTRAINT `venta_ibfk_1` FOREIGN KEY (`id_medio_de_pago`) REFERENCES `medio_pago` (`id_medio_de_pago`),
   CONSTRAINT `venta_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -547,9 +617,81 @@ CREATE TABLE `venta` (
 
 LOCK TABLES `venta` WRITE;
 /*!40000 ALTER TABLE `venta` DISABLE KEYS */;
-INSERT INTO `venta` VALUES (1,'2025-05-02',18050.00,1,'confirmada',2),(2,'2025-05-05',6150.00,4,'confirmada',2),(3,'2025-05-07',13900.00,3,'confirmada',3),(4,'2025-05-09',2150.00,2,'confirmada',2),(5,'2025-05-12',31600.00,1,'confirmada',3),(6,'2025-05-14',3600.00,4,'confirmada',2),(7,'2025-05-16',4500.00,2,'confirmada',3),(8,'2025-05-19',9300.00,1,'confirmada',2),(9,'2025-05-21',1600.00,4,'confirmada',3),(10,'2025-05-23',2400.00,1,'anulada',2),(11,'2026-06-10',94800.00,4,'anulada',1);
+INSERT INTO `venta` VALUES (1,'2025-05-02',18050.00,1,'confirmada',2),(2,'2025-05-05',6150.00,4,'confirmada',2),(3,'2025-05-07',13900.00,3,'confirmada',3),(4,'2025-05-09',2150.00,2,'confirmada',2),(5,'2025-05-12',31600.00,1,'confirmada',3),(6,'2025-05-14',3600.00,4,'confirmada',2),(7,'2025-05-16',4500.00,2,'confirmada',3),(8,'2025-05-19',9300.00,1,'confirmada',2),(9,'2025-05-21',1600.00,4,'confirmada',3),(10,'2025-05-23',2400.00,1,'anulada',2),(11,'2026-06-10',94800.00,4,'anulada',1),(12,'2026-06-11',82300.00,3,'anulada',1);
 /*!40000 ALTER TABLE `venta` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Final view structure for view `ProductosMasVendidos`
+--
+
+/*!50001 DROP VIEW IF EXISTS `ProductosMasVendidos`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `ProductosMasVendidos` AS select `p`.`id_producto` AS `id_producto`,`p`.`descripcion` AS `descripcion`,sum(`dv`.`cantidad`) AS `total_unidades_vendidas`,sum((`dv`.`cantidad` * `dv`.`precio_venta`)) AS `ingresos_generados` from ((`productos` `p` join `detalle_venta` `dv` on((`p`.`id_producto` = `dv`.`id_producto`))) join `venta` `v` on((`dv`.`id_venta` = `v`.`id_venta`))) where (`v`.`estado_venta` = 'confirmada') group by `p`.`id_producto`,`p`.`descripcion` order by `total_unidades_vendidas` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `ResumenClientes`
+--
+
+/*!50001 DROP VIEW IF EXISTS `ResumenClientes`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `ResumenClientes` AS select `c`.`id_cliente` AS `id_cliente`,`c`.`numero_documento` AS `numero_documento`,concat(`c`.`nombre`,' ',`c`.`apellido`) AS `cliente`,count(distinct `dv`.`id_venta`) AS `cantidad_tickets`,sum((`dv`.`cantidad` * `dv`.`precio_venta`)) AS `total_gastado` from (`clientes` `c` join `detalle_venta` `dv` on((`c`.`id_cliente` = `dv`.`id_cliente`))) group by `c`.`id_cliente`,`c`.`numero_documento`,`c`.`nombre`,`c`.`apellido` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `ResumenInventario`
+--
+
+/*!50001 DROP VIEW IF EXISTS `ResumenInventario`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `ResumenInventario` AS select `productos`.`id_producto` AS `id_producto`,`productos`.`descripcion` AS `descripcion`,`productos`.`stock_actual` AS `stock_actual`,`productos`.`stock_minimo` AS `stock_minimo`,(`productos`.`stock_actual` * `productos`.`precio_costo`) AS `valor_costo_total`,(`productos`.`stock_actual` * `productos`.`precio_venta`) AS `valor_venta_estimado`,(case when (`productos`.`stock_actual` <= 0) then 'Sin Stock' when (`productos`.`stock_actual` <= `productos`.`stock_minimo`) then 'Reponer Urgente' else 'Stock Normal' end) AS `estado_stock` from `productos` where (`productos`.`estado` = 'activo') */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `VentasCompletas`
+--
+
+/*!50001 DROP VIEW IF EXISTS `VentasCompletas`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `VentasCompletas` AS select `v`.`id_venta` AS `id_venta`,`v`.`fecha` AS `fecha`,concat(`c`.`nombre`,' ',`c`.`apellido`) AS `cliente`,`p`.`descripcion` AS `producto`,`dv`.`cantidad` AS `cantidad`,`dv`.`precio_venta` AS `precio_venta`,(`dv`.`cantidad` * `dv`.`precio_venta`) AS `subtotal_linea`,`mp`.`nombre` AS `medio_pago`,`u`.`usuario_login` AS `vendedor`,`v`.`estado_venta` AS `estado_venta` from (((((`venta` `v` join `detalle_venta` `dv` on((`v`.`id_venta` = `dv`.`id_venta`))) join `clientes` `c` on((`dv`.`id_cliente` = `c`.`id_cliente`))) join `productos` `p` on((`dv`.`id_producto` = `p`.`id_producto`))) join `medio_pago` `mp` on((`v`.`id_medio_de_pago` = `mp`.`id_medio_de_pago`))) join `usuarios` `u` on((`v`.`id_usuario` = `u`.`id_usuario`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -561,4 +703,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-10 19:07:46
+-- Dump completed on 2026-06-22 12:55:49
