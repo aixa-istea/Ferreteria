@@ -4,4 +4,4 @@
 
 ## 🖼️ Modelo Visual
 
-![Diagrama de Secuencia - Cliente](./DiagramaSecuencia-Cliente.jpeg)
+![Diagrama de Secuencia - Cliente](./DiagramaSecuencia-Cliente.png)
