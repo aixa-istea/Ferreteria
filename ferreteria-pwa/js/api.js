@@ -49,4 +49,10 @@ const api = {
   createUsuario: dto => apiFetch('/usuarios', { method: 'POST', body: JSON.stringify(dto) }),
   updateUsuario: (id, dto) => apiFetch(`/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(dto) }),
   deleteUsuario: id => apiFetch(`/usuarios/${id}`, { method: 'DELETE' }),
+
+  // Reportes
+  getReporteVentas: () => apiFetch('/reportes/ventas'),
+  getReporteClientes: () => apiFetch('/reportes/clientes'),
+  getReporteProductosMasVendidos: () => apiFetch('/reportes/productos-mas-vendidos'),
+  getReporteInventario: () => apiFetch('/reportes/inventario'),
 };
