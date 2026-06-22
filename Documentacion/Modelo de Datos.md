@@ -34,6 +34,20 @@
 
 ---
 
+### Excepción controlada: `id_cliente` en `detalle_venta`
+
+**Decisión de diseño:** Por consenso del equipo, el campo `id_cliente` se encuentra alojado en la tabla `detalle_venta` (líneas de detalle) en lugar de la tabla `venta` (cabecera).
+
+**Justificación técnica:**
+
+| Motivo | Explicación |
+|--------|-------------|
+| **Rendimiento** | Permite consultas más rápidas evitando joins innecesarios entre `venta` y `detalle_venta` en reportes frecuentes. |
+| **Auditoría** | Facilita la verificación directa de que cada detalle de venta pertenece al cliente correcto, agilizando devoluciones. |
+| **Agilidad** | Optimiza los tiempos de respuesta del sistema en el mostrador, cumpliendo con la premisa del relevamiento comercial. |
+
+---
+
 ## Diccionario de Datos
 
 > **Nota:** El detalle completo de campos, tipos y restricciones se desarrolla en el **Diccionario de Datos** (documento separado). Este documento se enfoca en la estructura general y las decisiones de diseño, basadas en el relevamiento del sistema y en el Diccionario de Datos como fuente principal para la definición de los campos.
@@ -88,15 +102,104 @@ Relaciona productos con proveedores.
 | `id_producto` | INT FK | ID del producto (PK compuesta) |
 | `id_proveedor` | INT FK | ID del proveedor (PK compuesta) |
 
+
+## Vistas en estudio
+
+> **En proceso de definición:** Las siguientes vistas están planificadas para facilitar consultas y reportes frecuentes.
+
+### 1. `VentasCompletas`
+
+**Propósito:** Historial de ventas con datos completos de cliente, usuario y medio de pago.
+
+```sql
+CREATE VIEW VentasCompletas AS
+SELECT 
+    v.id_venta,
+    v.fecha,
+    CONCAT(c.nombre, ' ', c.apellido) AS cliente,
+    p.descripcion AS producto,
+    dv.cantidad,
+    dv.precio_venta,
+    (dv.cantidad * dv.precio_venta) AS subtotal_linea,
+    mp.nombre AS medio_pago,
+    u.usuario_login AS vendedor,
+    v.estado_venta
+FROM venta v
+JOIN detalle_venta dv ON v.id_venta = dv.id_venta
+JOIN clientes c ON dv.id_cliente = c.id_cliente
+JOIN productos p ON dv.id_producto = p.id_producto
+JOIN medio_pago mp ON v.id_medio_de_pago = mp.id_medio_de_pago
+JOIN usuarios u ON v.id_usuario = u.id_usuario;
+```
+
+### 2. `ResumenClientes`
+
+**Propósito:** Estadísticas de compras por cliente.
+
+```sql
+CREATE VIEW ResumenClientes AS
+SELECT 
+    c.id_cliente,
+    c.numero_documento,
+    CONCAT(c.nombre, ' ', c.apellido) AS cliente,
+    COUNT(DISTINCT dv.id_venta) AS cantidad_tickets,
+    SUM(dv.cantidad * dv.precio_venta) AS total_gastado
+FROM clientes c
+JOIN detalle_venta dv ON c.id_cliente = dv.id_cliente
+GROUP BY c.id_cliente, c.numero_documento, c.nombre, c.apellido;
+```
+
+### 3. ProductosMasVendidos
+
+**Propósito:** Top 10 productos más vendidos.
+
+```sql
+CREATE VIEW ProductosMasVendidos AS
+SELECT 
+    p.id_producto,
+    p.descripcion,
+    SUM(dv.cantidad) AS total_unidades_vendidas,
+    SUM(dv.cantidad * dv.precio_venta) AS ingresos_generados
+FROM productos p
+JOIN detalle_venta dv ON p.id_producto = dv.id_producto
+JOIN venta v ON dv.id_venta = v.id_venta
+WHERE v.estado_venta = 'confirmada'
+GROUP BY p.id_producto, p.descripcion
+ORDER BY total_unidades_vendidas DESC;
+```
+
+### 4. ResumenInventario
+
+**Propósito:** Estado general del inventario.
+
+```sql
+CREATE VIEW ResumenInventario AS
+SELECT 
+    id_producto,
+    descripcion,
+    stock_actual,
+    stock_minimo,
+    (stock_actual * precio_costo) AS valor_costo_total,
+    (stock_actual * precio_venta) AS valor_venta_estimado,
+    CASE 
+        WHEN stock_actual <= 0 THEN 'Sin Stock'
+        WHEN stock_actual <= stock_minimo THEN 'Reponer Urgente'
+        ELSE 'Stock Normal'
+    END AS estado_stock
+FROM productos
+WHERE estado = 'activo';
+```
+
 ### Relaciones Principales
 
 ## Ventas
 
 ```text
-clientes (1) ---< (N) venta (1) ---< (N) detalle_venta (N) >--- (1) productos
-                                       |
-                                       +--- (N) >--- (1) medio_pago
-                                       +--- (N) >--- (1) usuarios
+medio_pago (1) ---< (N) +
+                        |
+usuarios (1) -----< (N) venta (1) ---< (N) detalle_venta (N) >--- (1) productos
+                                                |
+clientes (1) -----------------------------< (N) +
 ```
 
 ## Compras
@@ -154,6 +257,6 @@ WHERE estado = 'activo';
 ## Archivos Relacionados
 
 - **Script SQL:** `database/ferreteria_el_tornillo.sql`
-- **Relevamiento:** `documentacion/RelevamientoOLA.md`
-- **Diccionario de Datos:** `documentacion/Diccionario de Datos.md`
+- **Relevamiento:** `Documentacion/RelevamientoOLA.md`
+- **Diccionario de Datos:** `Documentacion/Diccionario de Datos.md`
 - **README Principal:** `README.md`
