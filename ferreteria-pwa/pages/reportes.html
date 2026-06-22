@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes – El Tornillo</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab {
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .tab.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #fff0f3;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .valor {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .stat-card .label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+    .filtros { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .filtros input { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem; }
+    .rank-num { font-weight: 700; color: var(--primary); font-size: 1rem; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🔩 El <span>Tornillo</span></div>
+  <nav>
+    <a href="productos.html">📦 Productos</a>
+    <a href="clientes.html">👤 Clientes</a>
+    <a href="ventas.html">🛒 Ventas</a>
+    <a href="proveedores.html">🚚 Proveedores</a>
+    <a href="usuarios.html">⚙️ Usuarios</a>
+    <a href="bajo-stock.html">⚠️ Bajo Stock</a>
+    <a href="reportes.html" class="active">📊 Reportes</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="usuarioNombre" style="margin-bottom:8px;color:#fff;font-size:0.85rem"></div>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</aside>
+
+<main class="main">
+  <h1 class="page-title">Reportes</h1>
+  <div id="alert"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="cambiarTab('ventas', this)">Ventas</button>
+    <button class="tab" onclick="cambiarTab('clientes', this)">Clientes</button>
+    <button class="tab" onclick="cambiarTab('productos', this)">Productos más vendidos</button>
+    <button class="tab" onclick="cambiarTab('inventario', this)">Inventario</button>
+  </div>
+
+  <!-- TAB: VENTAS -->
+  <div class="tab-content active" id="tab-ventas">
+    <div class="stat-grid" id="statsVentas"></div>
+    <div class="card">
+      <div class="filtros">
+        <label style="font-weight:600;font-size:0.88rem">Desde:</label>
+        <input type="date" id="filtroDesde">
+        <label style="font-weight:600;font-size:0.88rem">Hasta:</label>
+        <input type="date" id="filtroHasta">
+        <button class="btn btn-secondary" onclick="filtrarVentas()">Filtrar</button>
+        <button class="btn btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Fecha</th><th>Cliente</th><th>Producto</th>
+              <th>Cant.</th><th>Precio</th><th>Subtotal</th><th>Medio Pago</th>
+              <th>Vendedor</th><th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="bodyVentas"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: CLIENTES -->
+  <div class="tab-content" id="tab-clientes">
+    <div class="stat-grid" id="statsClientes"></div>
+    <div class="card">
+      <div class="filtros">
+        <input type="text" id="buscarCliente" placeholder="Buscar cliente..." style="width:260px">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Cliente</th><th>Documento</th><th>Tickets</th><th>Total gastado</th></tr>
+          </thead>
+          <tbody id="bodyClientes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: PRODUCTOS MAS VENDIDOS -->
+  <div class="tab-content" id="tab-productos">
+    <div class="stat-grid" id="statsProductos"></div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Producto</th><th>Unidades vendidas</th><th>Ingresos generados</th></tr>
+          </thead>
+          <tbody id="bodyProductos"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: INVENTARIO -->
+  <div class="tab-content" id="tab-inventario">
+    <div class="stat-grid" id="statsInventario"></div>
+    <div class="card">
+      <div class="filtros">
+        <select id="filtroEstadoStock" onchange="filtrarInventario()">
+          <option value="">Todos</option>
+          <option value="Sin Stock">Sin Stock</option>
+          <option value="Reponer Urgente">Reponer Urgente</option>
+          <option value="Stock Normal">Stock Normal</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Producto</th><th>Stock Actual</th><th>Stock Mínimo</th>
+              <th>Valor Costo</th><th>Valor Venta Est.</th><th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="bodyInventario"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  requireAuth();
+  const u = getUsuario();
+  document.getElementById('usuarioNombre').textContent = u.nombre + ' ' + u.apellido;
+
+  let datosVentas = [];
+  let datosClientes = [];
+  let datosProductos = [];
+  let datosInventario = [];
+
+  // ── Tabs ──────────────────────────────────────────────────
+  function cambiarTab(nombre, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${nombre}`).classList.add('active');
+  }
+
+  // ── Ventas ────────────────────────────────────────────────
+  async function cargarVentas() {
+    datosVentas = await api.getReporteVentas();
+    renderVentas(datosVentas);
+    renderStatsVentas(datosVentas);
+  }
+
+  function renderStatsVentas(datos) {
+    const confirmadas = datos.filter(v => v.estadoVenta === 'confirmada');
+    const total = confirmadas.reduce((acc, v) => acc + v.subtotalLinea, 0);
+    const ventas = [...new Set(confirmadas.map(v => v.idVenta))].length;
+    document.getElementById('statsVentas').innerHTML = `
+      <div class="stat-card"><div class="valor">${ventas}</div><div class="label">Ventas confirmadas</div></div>
+      <div class="stat-card"><div class="valor">$${total.toLocaleString('es-AR')}</div><div class="label">Ingresos totales</div></div>
+      <div class="stat-card"><div class="valor">${datos.length}</div><div class="label">Líneas de detalle</div></div>
+    `;
+  }
+
+  function renderVentas(datos) {
+    document.getElementById('bodyVentas').innerHTML = datos.map(v => `
+      <tr>
+        <td>${v.idVenta}</td>
+        <td>${v.fecha}</td>
+        <td>${v.cliente ?? '-'}</td>
+        <td>${v.producto}</td>
+        <td>${v.cantidad}</td>
+        <td>$${v.precioVenta.toLocaleString('es-AR')}</td>
+        <td>$${v.subtotalLinea.toLocaleString('es-AR')}</td>
+        <td>${v.medioPago}</td>
+        <td>${v.vendedor}</td>
+        <td><span class="badge ${v.estadoVenta === 'confirmada' ? 'badge-success' : 'badge-danger'}">${v.estadoVenta}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  function filtrarVentas() {
+    const desde = document.getElementById('filtroDesde').value;
+    const hasta = document.getElementById('filtroHasta').value;
+    let filtrado = datosVentas;
+    if (desde) filtrado = filtrado.filter(v => v.fecha >= desde);
+    if (hasta) filtrado = filtrado.filter(v => v.fecha <= hasta);
+    renderVentas(filtrado);
+    renderStatsVentas(filtrado);
+  }
+
+  function limpiarFiltros() {
+    document.getElementById('filtroDesde').value = '';
+    document.getElementById('filtroHasta').value = '';
+    renderVentas(datosVentas);
+    renderStatsVentas(datosVentas);
+  }
+
+  // ── Clientes ──────────────────────────────────────────────
+  async function cargarClientes() {
+    datosClientes = await api.getReporteClientes();
+    renderClientes(datosClientes);
+    document.getElementById('statsClientes').innerHTML = `
+      <div class="stat-card"><div class="valor">${datosClientes.length}</div><div class="label">Clientes activos</div></div>
+      <div class="stat-card"><div class="valor">$${datosClientes.reduce((a,c) => a + c.totalGastado, 0).toLocaleString('es-AR')}</div><div class="label">Total facturado</div></div>
+      <div class="stat-card"><div class="valor">${datosClientes.reduce((a,c) => a + c.cantidadTickets, 0)}</div><div class="label">Tickets emitidos</div></div>
+    `;
+  }
+
+  function renderClientes(datos) {
+    document.getElementById('bodyClientes').innerHTML = datos.map((c, i) => `
+      <tr>
+        <td><span class="rank-num">#${i + 1}</span></td>
+        <td>${c.cliente}</td>
+        <td>${c.numeroDocumento}</td>
+        <td>${c.cantidadTickets}</td>
+        <td>$${c.totalGastado.toLocaleString('es-AR')}</td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('buscarCliente').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    renderClientes(datosClientes.filter(c => c.cliente.toLowerCase().includes(q) || c.numeroDocumento.includes(q)));
+  });
+
+  // ── Productos más vendidos ────────────────────────────────
+  async function cargarProductos() {
+    datosProductos = await api.getReporteProductosMasVendidos();
+    document.getElementById('bodyProductos').innerHTML = datosProductos.map((p, i) => `
+      <tr>
+        <td><span class="rank-num">#${i + 1}</span></td>
+        <td>${p.descripcion}</td>
+        <td>${p.totalUnidadesVendidas}</td>
+        <td>$${p.ingresosGenerados.toLocaleString('es-AR')}</td>
+      </tr>
+    `).join('');
+    document.getElementById('statsProductos').innerHTML = `
+      <div class="stat-card"><div class="valor">${datosProductos.length}</div><div class="label">Productos vendidos</div></div>
+      <div class="stat-card"><div class="valor">${datosProductos.reduce((a,p) => a + p.totalUnidadesVendidas, 0)}</div><div class="label">Unidades totales</div></div>
+      <div class="stat-card"><div class="valor">$${datosProductos.reduce((a,p) => a + p.ingresosGenerados, 0).toLocaleString('es-AR')}</div><div class="label">Ingresos totales</div></div>
+    `;
+  }
+
+  // ── Inventario ────────────────────────────────────────────
+  async function cargarInventario() {
+    datosInventario = await api.getReporteInventario();
+    filtrarInventario();
+    document.getElementById('statsInventario').innerHTML = `
+      <div class="stat-card"><div class="valor">${datosInventario.filter(p => p.estadoStock === 'Sin Stock').length}</div><div class="label">Sin stock</div></div>
+      <div class="stat-card"><div class="valor">${datosInventario.filter(p => p.estadoStock === 'Reponer Urgente').length}</div><div class="label">Reponer urgente</div></div>
+      <div class="stat-card"><div class="valor">$${datosInventario.reduce((a,p) => a + p.valorCostoTotal, 0).toLocaleString('es-AR')}</div><div class="label">Valor costo total</div></div>
+      <div class="stat-card"><div class="valor">$${datosInventario.reduce((a,p) => a + p.valorVentaEstimado, 0).toLocaleString('es-AR')}</div><div class="label">Valor venta estimado</div></div>
+    `;
+  }
+
+  function filtrarInventario() {
+    const estado = document.getElementById('filtroEstadoStock').value;
+    const filtrado = estado ? datosInventario.filter(p => p.estadoStock === estado) : datosInventario;
+    document.getElementById('bodyInventario').innerHTML = filtrado.map(p => `
+      <tr>
+        <td>${p.idProducto}</td>
+        <td>${p.descripcion}</td>
+        <td><span class="badge ${p.estadoStock === 'Stock Normal' ? 'badge-success' : p.estadoStock === 'Reponer Urgente' ? 'badge-warning' : 'badge-danger'}">${p.stockActual}</span></td>
+        <td>${p.stockMinimo}</td>
+        <td>$${p.valorCostoTotal.toLocaleString('es-AR')}</td>
+        <td>$${p.valorVentaEstimado.toLocaleString('es-AR')}</td>
+        <td><span class="badge ${p.estadoStock === 'Stock Normal' ? 'badge-success' : p.estadoStock === 'Reponer Urgente' ? 'badge-warning' : 'badge-danger'}">${p.estadoStock}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  // ── Inicializar ───────────────────────────────────────────
+  async function init() {
+    try {
+      await Promise.all([cargarVentas(), cargarClientes(), cargarProductos(), cargarInventario()]);
+    } catch(e) {
+      mostrarAlerta('Error al cargar reportes: ' + e.message, 'danger');
+    }
+  }
+
+  function mostrarAlerta(msg, tipo) {
+    const el = document.getElementById('alert');
+    el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 4000);
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -32,17 +32,25 @@ public partial class FerreteriaDbContext : DbContext
 
     public virtual DbSet<Productos> Productos { get; set; }
 
+    public virtual DbSet<ProductosMasVendidos> ProductosMasVendidos { get; set; }
+
     public virtual DbSet<Proveedores> Proveedores { get; set; }
 
     public virtual DbSet<RecepcionDetalle> RecepcionDetalle { get; set; }
 
     public virtual DbSet<RecepcionPedido> RecepcionPedido { get; set; }
 
+    public virtual DbSet<ResumenClientes> ResumenClientes { get; set; }
+
+    public virtual DbSet<ResumenInventario> ResumenInventario { get; set; }
+
     public virtual DbSet<Roles> Roles { get; set; }
 
     public virtual DbSet<Usuarios> Usuarios { get; set; }
 
     public virtual DbSet<Venta> Venta { get; set; }
+
+    public virtual DbSet<VentasCompletas> VentasCompletas { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -362,6 +370,24 @@ public partial class FerreteriaDbContext : DbContext
                     });
         });
 
+        modelBuilder.Entity<ProductosMasVendidos>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ProductosMasVendidos");
+
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(100)
+                .HasColumnName("descripcion");
+            entity.Property(e => e.IdProducto).HasColumnName("id_producto");
+            entity.Property(e => e.IngresosGenerados)
+                .HasPrecision(42, 2)
+                .HasColumnName("ingresos_generados");
+            entity.Property(e => e.TotalUnidadesVendidas)
+                .HasPrecision(32)
+                .HasColumnName("total_unidades_vendidas");
+        });
+
         modelBuilder.Entity<Proveedores>(entity =>
         {
             entity.HasKey(e => e.IdProveedor).HasName("PRIMARY");
@@ -447,6 +473,53 @@ public partial class FerreteriaDbContext : DbContext
                 .HasConstraintName("recepcion_pedido_ibfk_3");
         });
 
+        modelBuilder.Entity<ResumenClientes>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ResumenClientes");
+
+            entity.Property(e => e.CantidadTickets).HasColumnName("cantidad_tickets");
+            entity.Property(e => e.Cliente)
+                .HasMaxLength(101)
+                .HasColumnName("cliente");
+            entity.Property(e => e.IdCliente).HasColumnName("id_cliente");
+            entity.Property(e => e.NumeroDocumento)
+                .HasMaxLength(20)
+                .HasColumnName("numero_documento");
+            entity.Property(e => e.TotalGastado)
+                .HasPrecision(42, 2)
+                .HasColumnName("total_gastado");
+        });
+
+        modelBuilder.Entity<ResumenInventario>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ResumenInventario");
+
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(100)
+                .HasColumnName("descripcion");
+            entity.Property(e => e.EstadoStock)
+                .HasMaxLength(15)
+                .HasDefaultValueSql("''")
+                .HasColumnName("estado_stock");
+            entity.Property(e => e.IdProducto).HasColumnName("id_producto");
+            entity.Property(e => e.StockActual)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("stock_actual");
+            entity.Property(e => e.StockMinimo)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("stock_minimo");
+            entity.Property(e => e.ValorCostoTotal)
+                .HasPrecision(20, 2)
+                .HasColumnName("valor_costo_total");
+            entity.Property(e => e.ValorVentaEstimado)
+                .HasPrecision(20, 2)
+                .HasColumnName("valor_venta_estimado");
+        });
+
         modelBuilder.Entity<Roles>(entity =>
         {
             entity.HasKey(e => e.IdRol).HasName("PRIMARY");
@@ -527,6 +600,39 @@ public partial class FerreteriaDbContext : DbContext
                 .HasForeignKey(d => d.IdUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("venta_ibfk_2");
+        });
+
+        modelBuilder.Entity<VentasCompletas>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("VentasCompletas");
+
+            entity.Property(e => e.Cantidad).HasColumnName("cantidad");
+            entity.Property(e => e.Cliente)
+                .HasMaxLength(101)
+                .HasColumnName("cliente");
+            entity.Property(e => e.EstadoVenta)
+                .HasDefaultValueSql("'confirmada'")
+                .HasColumnType("enum('confirmada','anulada')")
+                .HasColumnName("estado_venta");
+            entity.Property(e => e.Fecha).HasColumnName("fecha");
+            entity.Property(e => e.IdVenta).HasColumnName("id_venta");
+            entity.Property(e => e.MedioPago)
+                .HasColumnType("enum('efectivo','tarjeta_debito','tarjeta_credito','qr')")
+                .HasColumnName("medio_pago");
+            entity.Property(e => e.PrecioVenta)
+                .HasPrecision(10, 2)
+                .HasColumnName("precio_venta");
+            entity.Property(e => e.Producto)
+                .HasMaxLength(100)
+                .HasColumnName("producto");
+            entity.Property(e => e.SubtotalLinea)
+                .HasPrecision(20, 2)
+                .HasColumnName("subtotal_linea");
+            entity.Property(e => e.Vendedor)
+                .HasMaxLength(50)
+                .HasColumnName("vendedor");
         });
 
         OnModelCreatingPartial(modelBuilder);
