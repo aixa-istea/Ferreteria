@@ -18,7 +18,7 @@
 
 ## Diagrama Entidad-Relación
 
-![Modelo ER](ModeloER.png)
+![Modelo ER](./Recursos/ModeloER.png)
 
 *Diagrama generado mediante ingeniería inversa desde MySQL Workbench.*
 
@@ -136,7 +136,7 @@ SELECT * FROM productos
 WHERE stock_actual < stock_minimo AND estado = 'activo';
 ```
 
-![Productos con stock bajo](sql-stock-bajo.png)
+![Productos con stock bajo](./Recursos/sql-stock-bajo.png)
 *Productos con stock bajo, consulta desde MySQL Workbench.*
 
 ```sql
@@ -148,12 +148,12 @@ FROM productos
 WHERE estado = 'activo';
 ```
 
-![Valor del inventario](sql-valor-inventario.png)
+![Valor del inventario](./Recursos/sql-valor-inventario.png)
 *Valor del inventario, consulta desde MySQL Workbench.*
 
 ## Archivos Relacionados
 
 - **Script SQL:** `database/ferreteria_el_tornillo.sql`
 - **Relevamiento:** `documentacion/RelevamientoOLA.md`
-- **Diccionario de Datos:** `documentacion/DiccionarioDatos.md`
+- **Diccionario de Datos:** `documentacion/Diccionario de Datos.md`
 - **README Principal:** `README.md`
