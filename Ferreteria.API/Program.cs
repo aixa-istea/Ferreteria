@@ -24,6 +24,9 @@ builder.Services.AddDbContext<FerreteriaDbContext>(options =>
  builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
  builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
+builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
+builder.Services.AddScoped<IReporteService, ReporteService>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
