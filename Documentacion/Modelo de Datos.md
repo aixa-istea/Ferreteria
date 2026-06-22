@@ -146,8 +146,12 @@ SELECT
     SUM(dv.cantidad * dv.precio_venta) AS total_gastado
 FROM clientes c
 JOIN detalle_venta dv ON c.id_cliente = dv.id_cliente
+JOIN venta v ON dv.id_venta = v.id_venta
+WHERE v.estado_venta = 'confirmada'
 GROUP BY c.id_cliente, c.numero_documento, c.nombre, c.apellido;
 ```
+
+**Nota:** Solo considera ventas con `estado_venta = 'confirmada'`. Las ventas anuladas quedan excluidas del cálculo.
 
 ### 3. ProductosMasVendidos
 
