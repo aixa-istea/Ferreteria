@@ -4,30 +4,16 @@
 
 ---
 
-## 📋 Relevamiento General
+## 📋 Relevamiento
 
 La ferretería **"El Tornillo"** es atendida por sus **dos dueños** y **un hijo** como empleado/vendedor. A continuación se describe su funcionamiento actual y las necesidades detectadas.
+Cuando el cliente ingresa al local, selecciona o solicita uno o más productos en el mostrador. En ese momento, el vendedor inicia la toma de datos para registrarlo o buscarlo en el sistema. Acto seguido, se verifica la existencia de stock; el sistema debe mostrar de forma simultánea el precio de venta y la disponibilidad. Si el cliente lo desea, se le informa el precio independientemente de si hay existencias o no.
+Si hay stock disponible y el cliente acepta las condiciones, se realiza la carga del pedido indicando la cantidad deseada, siendo este un paso repetitivo por cada artículo. Luego de despachar dicho producto, se procede al cobro en la misma pantalla, donde el vendedor selecciona el medio de pago (Efectivo, TDD, TDC o QR). Al procesarse la transacción, el sistema genera el comprobante definitivo de venta (Ticket/Factura) y descuenta automáticamente las unidades del inventario.
+En cuanto a la gestión de abastecimiento, semanalmente se realiza un control de stock donde se analizan los productos con existencias mínimas o que deben reponerse. Con este listado de productos faltantes, se genera un pedido formal de compra a los proveedores. Semanalmente, el proveedor realiza la entrega de la mercadería solicitada. La misma es recibida y controlada. Una vez validada, se hace el pago al proveedor y se registra la factura correspondiente, finalmente se da de alta o actualiza el stock de los productos recibidos.
 
-### 🛒 Proceso de venta
-
-1. **Ingreso del cliente:** ingresa al local y selecciona o solicita uno o más productos en el mostrador.
-2. **Toma de datos:** el vendedor inicia el registro o la búsqueda del cliente en el sistema.
-3. **Verificación de stock y precio:** el sistema debe mostrar de forma **simultánea** el precio de venta y la disponibilidad.
-   - Si el cliente lo desea, se le informa el precio **independientemente** de si hay existencias o no.
-4. **Carga del pedido:** si hay stock y el cliente acepta, se indica la cantidad deseada (paso repetitivo por cada artículo).
-5. **Cobro:** en la misma pantalla, el vendedor selecciona el medio de pago (Efectivo, TDD, TDC o QR).
-6. **Cierre:** el sistema genera el comprobante definitivo (**Ticket / Factura**) y descuenta automáticamente las unidades del inventario.
-
-### 📦 Gestión de abastecimiento
-
-1. **Control semanal de stock:** se analizan los productos con existencias mínimas o que deben reponerse.
-2. **Pedido de compra:** con ese listado de faltantes, se genera un pedido formal a los proveedores.
-3. **Entrega:** semanalmente el proveedor entrega la mercadería solicitada.
-4. **Recepción y control:** la mercadería es recibida y controlada.
-5. **Validación final:** se realiza el pago al proveedor, se registra la factura correspondiente y se da de alta o se actualiza el stock de los productos recibidos.
 ---
 
-## 🎯 Objetivo General
+## 🎯 Objetivo
 
 Desarrollar e implementar un sistema informático de gestión de inventario y ventas para la ferretería **"El Tornillo"** en un plazo de **4 meses**, que permita optimizar el control de stock y centralizar el proceso de venta directa y cobro en el mostrador.
 
@@ -38,8 +24,6 @@ Desarrollar e implementar un sistema informático de gestión de inventario y ve
 |---|-------|
 | **Desde** | El momento en que un cliente ingresa al local solicitando un producto o el vendedor inicia la consulta de datos en el mostrador. |
 | **Hasta** | El registro definitivo de la factura del proveedor, el procesamiento de su correspondiente pago y la actualización del stock de mercadería recibida. |
-
----
 
 ---
 
@@ -62,8 +46,3 @@ Desarrollar e implementar un sistema informático de gestión de inventario y ve
 - **Ventas Online**
 - **Entrega a domicilio**
 - **Facturación de sueldos**
-
----
-
-
-
