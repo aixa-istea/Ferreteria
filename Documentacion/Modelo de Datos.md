@@ -90,9 +90,8 @@ Relaciona productos con proveedores.
 | `id_proveedor` | INT FK | ID del proveedor (PK compuesta) |
 
 
-## Vistas en estudio
+## Vistas utilizadas
 
-> **En proceso de definición:** Las siguientes vistas están planificadas para facilitar consultas y reportes frecuentes.
 
 ### 1. `VentasCompletas`
 
