@@ -1,33 +1,68 @@
-# 🔩 Ferretería El Tornillo
+# Ferretería El Tornillo
+### Sistema de Gestión de Inventario y Ventas
 
-Proyecto para Ingeniería de Software
-Sistema de gestión de inventario y ventas para la ferretería "El Tornillo".  
----
-
-## 🛠️ Tecnologías
-
-- **Backend:** ASP.NET Core 8 Web API (C#)
-- **Base de datos:** MySQL 8 (en Docker)
-- **ORM:** Entity Framework Core + Pomelo
-- **Frontend:** PWA (HTML, CSS, JavaScript)
+**Materia:** Ingeniería de Software — ISTEA 2026  
+**Grupo 1:** Rafael Enrique Cortez, Noelia Elisabeth Sanabria, Aixa Jezabel Sosa, Tomás Torres, Guillermo Eduardo Vicente
 
 ---
 
-## ⚙️ Requisitos previos
+## Índice
 
-Antes de arrancar, instalá lo siguiente:
-
-| Herramienta |
-|---|
-| Docker Desktop |
-| Visual Studio 2022 Community |
-| MySQL Workbench |
-| VS Code (para la PWA) |
-| Extensión Live Server (VS Code) |
+- [Descripción](#descripción)
+- [Documentación del proyecto](#documentación-del-proyecto)
+- [Tecnologías](#tecnologías)
+- [Requisitos previos](#requisitos-previos)
+- [Cómo levantar el proyecto](#cómo-levantar-el-proyecto)
+- [Usuarios de prueba](#usuarios-de-prueba)
+- [Estructura del repositorio](#estructura-del-repositorio)
 
 ---
 
-## 🚀 Cómo levantar el proyecto
+## Descripción
+
+Sistema informático de gestión de inventario y ventas para la ferretería "El Tornillo". Centraliza el proceso de venta directa, cobro en el mostrador, control de stock y gestión de proveedores.
+
+---
+
+## Documentación del proyecto
+
+| Documento | Descripción |
+|---|---|
+| [Relevamiento y OLA](Documentacion/RelevamentoOLA.md) | Objetivo, Límite y Alcance del sistema |
+| [Diccionario de Datos](Documentacion/Diccionario%20de%20Datos.md) | Definición de entidades y atributos |
+| [Modelo de Datos](Documentacion/Modelo%20de%20Datos.md) | Estructura de la base de datos, vistas y decisiones de diseño |
+| [Diagrama de Actividad](Documentacion/UML/DiagramaActividad.md) | Flujo del proceso de negocio |
+| [Diagrama de Secuencia — Venta](Documentacion/UML/DiagramaSecuencia-Cliente.md) | Interacción Cliente-Vendedor-Sistema |
+| [Diagrama de Secuencia — Abastecimiento](Documentacion/UML/DiagramaSecuencia-Proveedor.md) | Interacción Empleado-Sistema-Proveedor |
+
+---
+
+## Tecnologías
+
+| Capa | Tecnología |
+|---|---|
+| Backend | ASP.NET Core 8 Web API (C#) |
+| Base de datos | MySQL 8 (en Docker) |
+| ORM | Entity Framework Core + Pomelo (scaffold Database First) |
+| Frontend | PWA — HTML5, CSS3, JavaScript vanilla |
+| Contenedores | Docker Desktop + docker-compose |
+| Control de versiones | Git + GitHub |
+
+---
+
+## Requisitos previos
+
+| Herramienta | Descripción |
+|---|---|
+| [Docker Desktop](https://www.docker.com/products/docker-desktop) | Para correr MySQL en contenedor |
+| [Visual Studio 2022 Community](https://visualstudio.microsoft.com/vs/community/) | Para correr el backend C# |
+| [MySQL Workbench](https://dev.mysql.com/downloads/workbench/) | Para importar la base de datos |
+| [VS Code](https://code.visualstudio.com/) | Para correr la PWA |
+| Extensión Live Server (VS Code) | Para servir el frontend localmente |
+
+---
+
+## Cómo levantar el proyecto
 
 ### 1. Clonar el repositorio
 
@@ -38,56 +73,40 @@ cd Ferreteria
 
 ### 2. Levantar la base de datos con Docker
 
-> ⚠️ Docker Desktop tiene que estar abierto y corriendo.
-
-Abrí una terminal en la carpeta raíz del proyecto y ejecutá:
+> Docker Desktop tiene que estar abierto y corriendo.
 
 ```bash
 docker-compose up -d
 ```
 
-Esto levanta MySQL en el puerto **3308**. La primera vez tarda un poco porque descarga la imagen.
-
 Para verificar que está corriendo:
 ```bash
 docker ps
 ```
-Deberías ver `mysql-ferreteria` en la lista con estado `Up`.
 
 ### 3. Importar la base de datos
 
-1. Abrí **MySQL Workbench**
-2. Creá una nueva conexión:
-   - **Host:** 127.0.0.1
-   - **Port:** 3308
-   - **User:** root
-   - **Password:** ferreteria123
-3. Conectate y abrí el archivo `database/ferreteria_el_tornillo.sql`
-4. Ejecutalo con el botón del rayo ⚡ (o Ctrl+Shift+Enter)
-
-Esto crea la base de datos, todas las tablas y carga los datos de prueba.
+1. Abrí **MySQL Workbench** y conectate con:
+   - **Host:** 127.0.0.1 — **Port:** 3308 — **User:** root — **Password:** ferreteria123
+2. Abrí el archivo `database/ferreteria_el_tornillo.sql`
+3. Ejecutalo con el botón del rayo (o `Ctrl+Shift+Enter`)
 
 ### 4. Levantar la API
 
 1. Abrí `Ferreteria.sln` con **Visual Studio 2022**
-2. Verificá que el perfil de ejecución sea **Container (Dockerfile)**
-3. Presioná **F5** o el botón ▶️
+2. Seleccioná el perfil **Container (Dockerfile)**
+3. Presioná **F5**
 
-La API queda disponible en:
-- `http://localhost:5080/swagger` → documentación interactiva
-
-> 💡 La primera vez que buildea el contenedor puede tardar unos minutos.
+La API queda disponible en `http://localhost:5080/swagger`
 
 ### 5. Levantar la PWA
 
-1. Abrí VS Code
-2. `File → Open Folder` → seleccioná la carpeta `ferreteria-pwa`
-3. Click derecho en `index.html` → **Open with Live Server**
-4. Se abre el navegador en `http://127.0.0.1:5500`
+1. Abrí **VS Code** → `File → Open Folder` → carpeta `ferreteria-pwa`
+2. Click derecho en `index.html` → **Open with Live Server**
 
 ---
 
-## 🔑 Usuarios de prueba
+## Usuarios de prueba
 
 | Usuario | Contraseña | Rol |
 |---|---|---|
@@ -99,39 +118,37 @@ La API queda disponible en:
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura del repositorio
 
 ```
 Ferreteria/
-├── Ferreteria.API/          # ASP.NET Core Web API
-│   ├── Controllers/         # Endpoints REST
-│   ├── Services/            # Lógica de negocio
-│   └── DTOs/                # Objetos de transferencia
-├── Ferreteria.Data/         # Capa de datos
-│   ├── EF/                  # DbContext
-│   ├── Models/              # Entidades
-│   └── Repositories/        # Acceso a datos
-├── ferreteria-pwa/          # Frontend PWA
-│   ├── pages/               # Pantallas
-│   ├── css/                 # Estilos
-│   └── js/                  # Lógica JS y cliente API
-├── database/                # Scripts SQL
-├── docker-compose.yml       # Configuración Docker
+├── Documentacion/
+│   ├── UML/                         # Diagramas de actividad y secuencia
+│   ├── Recursos/                    # Imágenes y recursos gráficos
+│   ├── RelevamentoOLA.md            # Objetivo, Límite y Alcance
+│   ├── Diccionario de Datos.md      # Definición de entidades
+│   └── Modelo de Datos.md           # Estructura de DB y vistas
+│
+├── Ferreteria.API/                  # ASP.NET Core Web API
+│   ├── Controllers/                 # Endpoints REST
+│   ├── Services/                    # Lógica de negocio
+│   └── DTOs/                        # Objetos de transferencia
+│
+├── Ferreteria.Data/                 # Capa de acceso a datos
+│   ├── EF/                          # DbContext
+│   ├── Models/                      # Entidades EF Core
+│   └── Repositories/
+│       ├── Interfaces/
+│       └── Implementations/
+│
+├── ferreteria-pwa/                  # Frontend PWA
+│   ├── pages/                       # Pantallas
+│   ├── css/                         # Estilos
+│   └── js/                          # Lógica y cliente API
+│
+├── database/
+│   └── ferreteria_el_tornillo.sql   # Dump completo (estructura + datos)
+│
+├── docker-compose.yml               # Configuración Docker
 └── README.md
 ```
-
----
-
-## 🌐 Endpoints principales
-
-| Módulo | Endpoint |
-|---|---|
-| Auth | `POST /api/auth/login` |
-| Productos | `GET /api/productos` |
-| Bajo stock | `GET /api/productos/bajo-stock` |
-| Clientes | `GET /api/clientes` |
-| Ventas | `POST /api/ventas` |
-| Proveedores | `GET /api/proveedores` |
-| Usuarios | `GET /api/usuarios` |
-
-Documentación completa en Swagger: `http://localhost:5080/swagger`
