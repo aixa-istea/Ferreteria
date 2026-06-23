@@ -34,19 +34,6 @@
 
 ---
 
-### Excepción controlada: `id_cliente` en `detalle_venta`
-
-**Decisión de diseño:** Por consenso del equipo, el campo `id_cliente` se encuentra alojado en la tabla `detalle_venta` (líneas de detalle) en lugar de la tabla `venta` (cabecera).
-
-**Justificación técnica:**
-
-| Motivo | Explicación |
-|--------|-------------|
-| **Rendimiento** | Permite consultas más rápidas evitando joins innecesarios entre `venta` y `detalle_venta` en reportes frecuentes. |
-| **Auditoría** | Facilita la verificación directa de que cada detalle de venta pertenece al cliente correcto, agilizando devoluciones. |
-| **Agilidad** | Optimiza los tiempos de respuesta del sistema en el mostrador, cumpliendo con la premisa del relevamiento comercial. |
-
----
 
 ## Diccionario de Datos
 
