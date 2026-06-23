@@ -27,10 +27,10 @@
 * **productos_x_proveedor** = { @id_producto, @id_proveedor }
 
 
-* **venta** = { @id_venta, fecha, total_venta, id_medio_de_pago(fk), estado_venta [confirmada | anulada], id_usuario(fk) }
+* **venta** = { @id_venta, fecha, total_venta, id_medio_de_pago(fk), estado_venta [confirmada | anulada], id_usuario(fk), id_cliente (fk) }
 
 
-* **detalle_venta** = { @id_venta(fk), @id_producto(fk), cantidad, precio_venta, Id_cliente (fk) }
+* **detalle_venta** = { @id_venta(fk), @id_producto(fk), cantidad, precio_venta }
 
 
 * **medio_pago** = { @id_medio_de_pago, nombre [efectivo | tarjeta_debito, tarjeta_credito | qr] }
